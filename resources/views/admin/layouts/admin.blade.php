@@ -123,16 +123,16 @@
 </head>
 <body>
     <div class="admin-page">
-        @include('admin.partials.sidebar')
+        @include('admin._partials.sidebar')
 
         <div class="admin-main">
-            @include('admin.partials.header')
+            @include('admin._partials.header')
 
             <main class="admin-content">
                 @yield('content')
             </main>
 
-            @include('admin.partials.footer')
+            @include('admin._partials.footer')
         </div>
     </div>
 
