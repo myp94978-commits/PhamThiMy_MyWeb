@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
     public function index()
     {
-        $posts = ["Bài viết 1", "Bài viết 2", "Bài viết 3"];
+        $posts = Post::all();
         return view('admin.post.index', compact('posts'));
     }
 
@@ -20,28 +21,45 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
-        $title = $request->input('title');
-        return "Bạn vừa thêm Post: " . $title;
+        $request->validate([
+            'title' => 'required|string|max:255',
+        ]);
+
+        Post::create($request->only('title'));
+
+        return redirect('/admin/post')->with('success', 'Đã thêm Post mới.');
     }
 
     public function show($id)
     {
-        return "Chi tiết Post có ID: " . $id;
+        $post = Post::findOrFail($id);
+        return view('admin.post.show', compact('post'));
     }
 
     public function edit($id)
     {
-        return view('admin.post.edit', compact('id'));
+        $post = Post::findOrFail($id);
+        return view('admin.post.edit', compact('post'));
     }
 
     public function update(Request $request, $id)
     {
-        $title = $request->input('title');
-        return "Post có ID $id đã được cập nhật thành: " . $title;
+        $post = Post::findOrFail($id);
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+        ]);
+
+        $post->update($request->only('title'));
+
+        return redirect('/admin/post')->with('success', 'Đã cập nhật Post.');
     }
 
     public function destroy($id)
     {
-        return "Xóa Post có ID: " . $id;
+        $post = Post::findOrFail($id);
+        $post->delete();
+
+        return redirect('/admin/post')->with('success', 'Đã xóa Post.');
     }
 }

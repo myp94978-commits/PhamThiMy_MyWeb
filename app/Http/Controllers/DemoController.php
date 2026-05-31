@@ -37,8 +37,6 @@ public function index4($id)
 public function index5($id = null)
 {
     $data = "ABC";
-
-     dd($id);
     return view('demoindex5', compact('data','id'));
 }
 

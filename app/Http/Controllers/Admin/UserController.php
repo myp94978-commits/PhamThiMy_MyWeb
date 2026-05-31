@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $users = ["Nguyễn Văn A", "Trần Thị B", "Lê Văn C"];
+        $users = User::all();
         return view('admin.user.index', compact('users'));
     }
 
@@ -20,28 +22,65 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $name = $request->input('name');
-        return "Bạn vừa thêm User: " . $name;
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect('/admin/user')->with('success', 'Đã thêm User mới.');
     }
 
     public function show($id)
     {
-        return "Chi tiết User có ID: " . $id;
+        $user = User::findOrFail($id);
+        return view('admin.user.show', compact('user'));
     }
 
     public function edit($id)
     {
-        return view('admin.user.edit', compact('id'));
+        $user = User::findOrFail($id);
+        return view('admin.user.edit', compact('user'));
     }
 
     public function update(Request $request, $id)
     {
-        $name = $request->input('name');
-        return "User có ID $id đã được cập nhật thành: " . $name;
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:6',
+        ]);
+
+        $data = [
+            'name' => $request->name,
+            'email' => $request->email,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $user->update($data);
+
+        return redirect('/admin/user')->with('success', 'Đã cập nhật User.');
     }
 
     public function destroy($id)
     {
-        return "Xóa User có ID: " . $id;
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return redirect('/admin/user')->with('success', 'Đã xóa User.');
     }
+    // public function test(){
+    //     return view('admin.layout.admin');
+    // }
 }

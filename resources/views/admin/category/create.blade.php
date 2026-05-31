@@ -1,7 +1,7 @@
-<h1>Thêm Brand mới</h1>
-<form method="POST" action="/admin/brand">
+<h1>Thêm Category mới</h1>
+<form method="POST" action="/admin/category">
     @csrf
-    <label>Tên Brand:</label>
+    <label>Tên Category:</label>
     <input type="text" name="name" value="{{ old('name') }}">
     @error('name')
         <div style="color: red;">{{ $message }}</div>

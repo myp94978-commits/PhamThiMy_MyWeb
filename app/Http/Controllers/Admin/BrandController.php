@@ -3,52 +3,63 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Brand;
 use Illuminate\Http\Request;
 
 class BrandController extends Controller
 {
-    // Hiển thị danh sách
     public function index()
     {
-        $brands = ["Apple", "Samsung", "Sony"];
+        $brands = Brand::all();
         return view('admin.brand.index', compact('brands'));
     }
 
-    // Hiển thị form thêm brand
     public function create()
     {
         return view('admin.brand.create');
     }
 
-    // Xử lý dữ liệu form thêm brand
     public function store(Request $request)
     {
-        $name = $request->input('name');
-        // Tạm thời chỉ test, chưa lưu DB
-        return "Bạn vừa thêm Brand: " . $name;
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        Brand::create($request->only('name'));
+
+        return redirect('/admin/brand')->with('success', 'Đã thêm Brand mới.');
     }
 
-    // Hiển thị chi tiết brand
     public function show($id)
     {
-        return "Chi tiết Brand có ID: " . $id;
+        $brand = Brand::findOrFail($id);
+        return view('admin.brand.show', compact('brand'));
     }
 
-    // Hiển thị form sửa brand
     public function edit($id)
-{
-    return view('admin.brand.edit', compact('id'));
-}
-    // Cập nhật brand
-    public function update(Request $request, $id)
-{
-    $name = $request->input('name');
-    return "Brand có ID $id đã được cập nhật thành: " . $name;
-}
+    {
+        $brand = Brand::findOrFail($id);
+        return view('admin.brand.edit', compact('brand'));
+    }
 
-    // Xóa brand
+    public function update(Request $request, $id)
+    {
+        $brand = Brand::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $brand->update($request->only('name'));
+
+        return redirect('/admin/brand')->with('success', 'Đã cập nhật Brand.');
+    }
+
     public function destroy($id)
     {
-        return "Xóa Brand có ID: " . $id;
+        $brand = Brand::findOrFail($id);
+        $brand->delete();
+
+        return redirect('/admin/brand')->with('success', 'Đã xóa Brand.');
     }
 }

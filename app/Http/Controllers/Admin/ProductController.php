@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = ["Laptop", "Điện thoại", "Máy ảnh"];
+        $products = Product::all();
         return view('admin.product.index', compact('products'));
     }
 
@@ -20,28 +22,55 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $name = $request->input('name');
-        return "Bạn vừa thêm Product: " . $name;
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        Product::create($request->only('name'));
+
+        return redirect('/admin/product')->with('success', 'Đã thêm Product mới.');
     }
 
     public function show($id)
     {
-        return "Chi tiết Product có ID: " . $id;
+        $product = Product::findOrFail($id);
+        return view('admin.product.show', compact('product'));
     }
 
     public function edit($id)
     {
-        return view('admin.product.edit', compact('id'));
+        $product = Product::findOrFail($id);
+        return view('admin.product.edit', compact('product'));
     }
 
     public function update(Request $request, $id)
     {
-        $name = $request->input('name');
-        return "Product có ID $id đã được cập nhật thành: " . $name;
+        $product = Product::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $product->update($request->only('name'));
+
+        return redirect('/admin/product')->with('success', 'Đã cập nhật Product.');
     }
 
     public function destroy($id)
     {
-        return "Xóa Product có ID: " . $id;
+        $product = Product::findOrFail($id);
+        $product->delete();
+
+        return redirect('/admin/product')->with('success', 'Đã xóa Product.');
+    }
+
+    public function test1(): RedirectResponse
+    {
+        return redirect()->route('admin.home');
+    }
+
+    public function test2(): RedirectResponse
+    {
+        return redirect('/admin/dashboard');
     }
 }
