@@ -34,6 +34,7 @@ Route::get('/demo4/{id}', [DemoController::class, 'index4']);
 Route::get('/demo5/{id?}', [DemoController::class, 'index5']);
 Route::get('/demo6/{param1}/{param2}', [DemoController::class, 'index6']);
 
+
 Route::prefix('admin')->group(function () {
     Route::resource('category', CategoryController::class);
     Route::resource('brand', BrandController::class);
