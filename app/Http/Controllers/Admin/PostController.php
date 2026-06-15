@@ -6,18 +6,25 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
+    
     public function index()
     {
-        $posts = Post::with('user')->get();
-        return view('admin.post.index', compact('posts'));
+          $list = DB::table('posts')
+          ->leftJoin('users', 'posts.user_id', '=', 'users.id')
+          ->select('posts.*', 'users.fullname as username')
+          ->orderBy('posts.title')
+          ->get();
+
+        return view('admin.post.index', compact('list'));
     }
 
     public function create()
     {
-        $users = User::orderBy('fullname')->get();
+        $users = User::orderBy('name')->get();
         return view('admin.post.create', compact('users'));
     }
 

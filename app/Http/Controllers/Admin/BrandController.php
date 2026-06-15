@@ -6,14 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class BrandController extends Controller
 {
     public function index()
-    {
-        $brands = Brand::all();
-        return view('admin.brand.index', compact('brands'));
-    }
+{
+    $list = DB::table('brands')
+        ->where('status', 1)
+        ->orderBy('brandname')
+        ->get();
+
+    return view('admin.brand.index', compact('list'));
+}
 
     public function create()
     {

@@ -8,15 +8,25 @@ use App\Models\Category;
 use App\Models\Brand;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     public function index()
-    {
-        $products = Product::with(['brand', 'category'])->get();
-        return view('admin.product.index', compact('products'));
-    }
+{
+    $list = DB::table('products')
+        ->join('categories', 'products.cateid', '=', 'categories.cateid')
+        ->leftJoin('brands', 'products.brandid', '=', 'brands.id')
+        ->select(
+            'products.*',
+            'categories.catename',
+            'brands.brandname'
+        )
+        ->orderBy('products.productname')
+        ->get();
 
+    return view('admin.product.index', compact('list'));
+}
     public function create()
     {
         $categories = Category::orderBy('sort_order')->get();
