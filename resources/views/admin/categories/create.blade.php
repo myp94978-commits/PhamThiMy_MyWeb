@@ -16,11 +16,20 @@
             <input type="text" name="catename" class="form-control" required>
         </div>
 
-        <!-- Slug -->
-        <div class="mb-3">
-            <label>Slug</label>
-            <input type="text" name="slug" class="form-control" required>
-        </div>
+       <!-- Slug -->
+<div class="mb-3">
+    <label>Slug</label>
+    <input type="text" name="slug" class="form-control" required>
+</div>
+
+<!-- Trạng thái -->
+<div class="mb-3">
+    <label>Trạng thái</label>
+    <select name="status" class="form-control">
+        <option value="1">Hiển thị</option>
+        <option value="0">Ẩn</option>
+    </select>
+</div>
 
         <!-- Button -->
         <button type="submit" class="btn btn-primary">

@@ -10,12 +10,10 @@ use Illuminate\Support\Facades\DB;
 
 class BrandController extends Controller
 {
-    public function index()
+    public function index($limit = 10)
 {
-    $list = DB::table('brands')
-        ->where('status', 1)
-        ->orderBy('brandname')
-        ->get();
+    $list = Brand::orderBy('brandname')
+        ->paginate($limit);
 
     return view('admin.brand.index', compact('list'));
 }

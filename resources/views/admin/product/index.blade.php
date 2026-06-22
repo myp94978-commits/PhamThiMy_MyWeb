@@ -18,21 +18,38 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($list as $key => $item)
-            <tr>
-                <td>{{ $key + 1 }}</td>
+@forelse($list as $item)
+<tr>
+    <td>{{ $list->firstItem() + $loop->index }}</td>
 
-                <td>
-                    <img src="{{ asset('images/default.png') }}" width="60">
-                </td>
+    <td>{{ $item->productname }}</td>
 
-                <td>{{ $item->productname }}</td>
-                <td>{{ $item->price }}</td>
-                <td>{{ $item->catename }}</td>
-                <td>{{ $item->brandname }}</td>
-            </tr>
-            @endforeach
-        </tbody>
+    <td>{{ $item->category?->catename }}</td>
+
+    <td>{{ $item->brand?->brandname }}</td>
+
+    <td>{{ number_format($item->price) }}</td>
+
+    <td>
+        @if($item->status)
+            <span class="badge bg-success">Hiện</span>
+        @else
+            <span class="badge bg-danger">Ẩn</span>
+        @endif
+    </td>
+</tr>
+@empty
+<tr>
+    <td colspan="6" class="text-center">
+        Không có dữ liệu
+    </td>
+</tr>
+@endforelse
+</tbody>
     </table>
+
+    <div class="d-flex justify-content-center">
+    {{ $list->links() }}
+      </div>
 </div>
 @endsection

@@ -10,14 +10,21 @@ use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index($limit =10 )
 {
-    $list = DB::table('categories')
-        ->select('cateid', 'catename', 'status', 'slug')
-        ->where('status', 1)
-        
+
+    // ===== Query Builder
+    // $list = DB::table('categories')
+    //     ->select('cateid', 'catename', 'slug', 'image', 'status')
+    //     ->where('status', 1)
+    //     ->orderBy('catename')
+    //     ->get();
+
+
+    // ===== ORM Eloquent
+    $list = Category::select('cateid', 'catename', 'slug', 'image', 'status')
         ->orderBy('catename')
-        ->get();
+        ->paginate($limit);
 
     return view('admin.categories.index', compact('list'));
 }
@@ -29,10 +36,11 @@ class CategoryController extends Controller
 
     public function store(Request $request)
 {
-    DB::table('categories')->insert([
-     'catename' => $request->catename,
-     'slug' => $request->slug
-]);
+    Category::create([
+        'catename' => $request->catename,
+        'slug' => $request->slug,
+        'status' => 1
+    ]);
 
     return redirect()->route('admin.categories.index');
 }

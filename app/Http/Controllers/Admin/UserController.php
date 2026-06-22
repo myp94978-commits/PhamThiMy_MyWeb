@@ -9,12 +9,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 class UserController extends Controller
 {
-    public function index()
+    public function index($limit = 10)
 {
-    $list = DB::table('users')
-        ->where('status', 1)
-        ->orderBy('fullname')
-        ->get();
+    $list = User::orderBy('fullname')
+        ->paginate($limit);
 
     return view('admin.user.index', compact('list'));
 }

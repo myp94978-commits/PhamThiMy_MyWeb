@@ -12,18 +12,23 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    public function index()
+   public function index($limit = 10)
 {
-    $list = DB::table('products')
-        ->join('categories', 'products.cateid', '=', 'categories.cateid')
-        ->leftJoin('brands', 'products.brandid', '=', 'brands.id')
-        ->select(
-            'products.*',
-            'categories.catename',
-            'brands.brandname'
-        )
-        ->orderBy('products.productname')
-        ->get();
+    $list = Product::with([
+        'category:cateid,catename',
+        'brand:id,brandname'
+    ])
+    ->select(
+        'id',
+        'productname',
+        'price',
+        'image',
+        'status',
+        'cateid',
+        'brandid'
+    )
+    ->orderBy('productname')
+    ->paginate($limit);
 
     return view('admin.product.index', compact('list'));
 }
