@@ -6,6 +6,10 @@
 <div class="admin-card">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="mb-0">DANH SÁCH THƯƠNG HIỆU</h2>
+         <a href="{{ route('admin.brand.create') }}"
+       class="btn btn-primary">
+        Thêm thương hiệu
+        </a>
     </div>
 
     @if($list->isEmpty())
@@ -21,6 +25,7 @@
                     <th>Tên thương hiệu</th>
                     <th>Slug</th>
                     <th>Trạng thái</th>
+                    <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -41,7 +46,25 @@
                             @else
                                 <span class="badge bg-danger">Ẩn</span>
                             @endif
-                        </td>
+                          <td>
+    <a href="{{ route('admin.brand.edit', $item->id) }}"
+       class="btn btn-sm btn-success">
+        <i class="fas fa-edit"></i>
+    </a>
+
+    <form action="{{ route('admin.brand.destroy', $item->id) }}"
+          method="POST"
+          style="display:inline;">
+        @csrf
+        @method('DELETE')
+
+        <button type="submit"
+                class="btn btn-sm btn-danger"
+                onclick="return confirm('Bạn có chắc muốn xóa không?')">
+            <i class="fas fa-trash"></i>
+        </button>
+    </form>
+</td>
                     </tr>
                 @endforeach
             </tbody>

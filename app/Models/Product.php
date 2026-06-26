@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Category;
 use App\Models\Brand;
+
 class Product extends Model
 {
     protected $table = 'products';
@@ -12,11 +13,12 @@ class Product extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'proname',
+        'productname',
         'cateid',
         'brandid',
         'slug',
         'price',
+        'pricediscount',
         'image',
         'status',
         'description'
@@ -32,3 +34,4 @@ class Product extends Model
         return $this->belongsTo(Brand::class, 'brandid', 'id');
     }
 }
+   

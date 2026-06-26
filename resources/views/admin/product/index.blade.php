@@ -3,53 +3,90 @@
 @section('title', 'Danh sách sản phẩm')
 
 @section('content')
+
 <div class="admin-card">
-    <h2>DANH SÁCH SẢN PHẨM</h2>
 
-    <table class="table table-bordered table-hover">
-        <thead>
-            <tr>
-                <th>STT</th>
-                <th>Ảnh</th>
-                <th>Tên sản phẩm</th>
-                <th>Giá</th>
-                <th>Loại sản phẩm</th>
-                <th>Thương hiệu</th>
-            </tr>
-        </thead>
-        <tbody>
-@forelse($list as $item)
-<tr>
-    <td>{{ $list->firstItem() + $loop->index }}</td>
 
-    <td>{{ $item->productname }}</td>
+<h2>DANH SÁCH SẢN PHẨM</h2>
 
-    <td>{{ $item->category?->catename }}</td>
+<a href="{{ route('admin.product.create') }}"
+   class="btn btn-primary mb-3">
+    Thêm mới
+</a>
 
-    <td>{{ $item->brand?->brandname }}</td>
+@if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
 
-    <td>{{ number_format($item->price) }}</td>
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>STT</th>
+            <th>Tên sản phẩm</th>
+            <th>Loại sản phẩm</th>
+            <th>Thương hiệu</th>
+            <th>Giá</th>
+            <th>Trạng thái</th>
+            <th width="120">Thao tác</th>
+        </tr>
+    </thead>
 
-    <td>
-        @if($item->status)
-            <span class="badge bg-success">Hiện</span>
-        @else
-            <span class="badge bg-danger">Ẩn</span>
-        @endif
-    </td>
-</tr>
-@empty
-<tr>
-    <td colspan="6" class="text-center">
-        Không có dữ liệu
-    </td>
-</tr>
-@endforelse
-</tbody>
-    </table>
+    <tbody>
+    @forelse($list as $item)
+        <tr>
+            <td>{{ $list->firstItem() + $loop->index }}</td>
 
-    <div class="d-flex justify-content-center">
+            <td>{{ $item->productname }}</td>
+
+            <td>{{ $item->category?->catename }}</td>
+
+            <td>{{ $item->brand?->brandname }}</td>
+
+            <td>{{ number_format($item->price) }}</td>
+
+            <td>
+                @if($item->status)
+                    <span class="badge bg-success">Hiện</span>
+                @else
+                    <span class="badge bg-danger">Ẩn</span>
+                @endif
+            </td>
+
+            <td>
+    <a href="{{ route('admin.brand.edit', $item->id) }}"
+       class="btn btn-sm btn-success">
+        <i class="fas fa-edit"></i>
+    </a>
+
+    <form action="{{ route('admin.brand.destroy', $item->id) }}"
+          method="POST"
+          style="display:inline;">
+        @csrf
+        @method('DELETE')
+
+        <button type="submit"
+                class="btn btn-sm btn-danger"
+                onclick="return confirm('Bạn có chắc muốn xóa không?')">
+            <i class="fas fa-trash"></i>
+        </button>
+    </form>
+</td>
+    @empty
+        <tr>
+            <td colspan="7" class="text-center">
+                Không có dữ liệu
+            </td>
+        </tr>
+    @endforelse
+    </tbody>
+</table>
+
+<div class="d-flex justify-content-center">
     {{ $list->links() }}
-      </div>
+</div>
+
+
 </div>
 @endsection

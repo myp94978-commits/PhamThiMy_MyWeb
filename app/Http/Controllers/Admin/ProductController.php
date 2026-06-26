@@ -33,94 +33,113 @@ class ProductController extends Controller
     return view('admin.product.index', compact('list'));
 }
     public function create()
-    {
-        $categories = Category::orderBy('sort_order')->get();
-        $brands = Brand::orderBy('sort_order')->get();
-        return view('admin.product.create', compact('categories', 'brands'));
-    }
+{
+    $categories = Category::select('cateid', 'catename')->get();
+    $brands = Brand::select('id', 'brandname')->get();
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'productname' => 'required|string|max:150',
-            'slug' => 'required|string|max:200|unique:products,slug',
-            'price' => 'required|integer|min:0',
-            'pricediscount' => 'nullable|integer|min:0',
-            'image' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'status' => 'required|in:0,1',
-            'brandid' => 'nullable|exists:brands,id',
-            'cateid' => 'nullable|exists:categories,id',
+    return view('admin.product.create', compact('categories', 'brands'));
+}
+
+   public function store(Request $request)
+{
+    try {
+
+        Product::create([
+            'productname'   => $request->productname,
+            'slug'          => $request->slug,
+            'cateid'        => $request->cateid,
+            'brandid'       => $request->brandid,
+            'price'         => $request->price,
+            'pricediscount' => $request->pricediscount ?? 0,
+            'description'   => $request->description,
+            'status'        => $request->status,
         ]);
 
-        Product::create($request->only([
-            'productname',
-            'slug',
-            'price',
-            'pricediscount',
-            'image',
-            'description',
-            'status',
-            'brandid',
-            'cateid',
-        ]));
+        return redirect()
+            ->route('admin.product.index')
+            ->with('success', 'Thêm sản phẩm thành công');
 
-        return redirect('/admin/product')->with('success', 'Đã thêm Product mới.');
+    } catch (\Exception $e) {
+
+        return back()
+            ->withInput()
+            ->with('error', $e->getMessage());
     }
-
+}
     public function show($id)
     {
         $product = Product::with(['brand', 'category'])->findOrFail($id);
         return view('admin.product.show', compact('product'));
     }
 
-    public function edit($id)
-    {
-        $product = Product::findOrFail($id);
-        $categories = Category::orderBy('sort_order')->get();
-        $brands = Brand::orderBy('sort_order')->get();
-        return view('admin.product.edit', compact('product', 'categories', 'brands'));
-    }
+   public function edit($id)
+{
+    $product = Product::find($id);
 
-    public function update(Request $request, $id)
-    {
-        $product = Product::findOrFail($id);
+    $categories = Category::all();
 
-        $request->validate([
-            'productname' => 'required|string|max:150',
-            'slug' => 'required|string|max:200|unique:products,slug,' . $id,
-            'price' => 'required|integer|min:0',
-            'pricediscount' => 'nullable|integer|min:0',
-            'image' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'status' => 'required|in:0,1',
-            'brandid' => 'nullable|exists:brands,id',
-            'cateid' => 'nullable|exists:categories,id',
+    $brands = Brand::all();
+
+    return view('admin.product.edit',
+    compact('product','categories','brands'));
+}
+
+  public function update(Request $request, string $id)
+{
+    try {
+
+        if (empty($request->cateid)) {
+            return back()
+                ->withInput()
+                ->with('error', 'Vui lòng chọn loại sản phẩm');
+        }
+
+        $product = Product::find($id);
+
+        if (!$product) {
+            return redirect()
+                ->route('admin.product.index')
+                ->with('error', 'Sản phẩm không tồn tại');
+        }
+
+        $product->update([
+            'productname'   => $request->productname,
+            'slug'          => $request->slug,
+            'cateid'        => $request->cateid,
+            'brandid'       => $request->brandid,
+            'price'         => $request->price,
+            'pricediscount' => $request->pricediscount,
+            'status'        => $request->status,
+            'description'   => $request->description
         ]);
 
-        $product->update($request->only([
-            'productname',
-            'slug',
-            'price',
-            'pricediscount',
-            'image',
-            'description',
-            'status',
-            'brandid',
-            'cateid',
-        ]));
+        return redirect()
+            ->route('admin.product.index')
+            ->with('success', 'Cập nhật sản phẩm thành công');
 
-        return redirect('/admin/product')->with('success', 'Đã cập nhật Product.');
+    } catch (\Exception $e) {
+
+        return back()
+            ->withInput()
+            ->with('error', $e->getMessage());
     }
+}    public function destroy($id)
+{
+    try {
 
-    public function destroy($id)
-    {
         $product = Product::findOrFail($id);
+
         $product->delete();
 
-        return redirect('/admin/product')->with('success', 'Đã xóa Product.');
-    }
+        return redirect('/admin/product')
+            ->with('success', 'Đã xóa sản phẩm thành công.');
 
+    } catch (\Exception $e) {
+
+        return redirect('/admin/product')
+            ->with('error', $e->getMessage());
+    }
+}
     public function test1(): RedirectResponse
     {
         return redirect()->route('admin.home');
