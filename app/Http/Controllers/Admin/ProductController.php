@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
@@ -40,7 +40,7 @@ class ProductController extends Controller
     return view('admin.product.create', compact('categories', 'brands'));
 }
 
-   public function store(Request $request)
+   public function store(ProductRequest $request)
 {
     try {
 
@@ -84,16 +84,9 @@ class ProductController extends Controller
     compact('product','categories','brands'));
 }
 
-  public function update(Request $request, string $id)
+  public function update(ProductRequest $request, string $id)
 {
     try {
-
-        if (empty($request->cateid)) {
-            return back()
-                ->withInput()
-                ->with('error', 'Vui lòng chọn loại sản phẩm');
-        }
-
         $product = Product::find($id);
 
         if (!$product) {

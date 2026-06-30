@@ -7,11 +7,7 @@
 
     <h3 class="mb-4">Sửa sản phẩm</h3>
 
-    @if(session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @endif
+    <x-admin.alert />
 
     <form action="{{ route('admin.product.update', $product->id) }}" method="POST">
         @csrf
@@ -28,6 +24,9 @@
                            class="form-control"
                            value="{{ old('productname', $product->productname) }}"
                            required>
+                    @error('productname')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="mb-3">
@@ -37,6 +36,9 @@
                            class="form-control"
                            value="{{ old('slug', $product->slug) }}"
                            required>
+                    @error('slug')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="mb-3">
@@ -51,6 +53,9 @@
                             </option>
                         @endforeach
                     </select>
+                    @error('cateid')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="mb-3">
@@ -65,6 +70,9 @@
     </option>
 @endforeach
                     </select>
+                    @error('brandid')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
             </div>
@@ -78,6 +86,9 @@
                            class="form-control"
                            value="{{ old('price', $product->price) }}"
                            required>
+                    @error('price')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="mb-3">
@@ -86,6 +97,9 @@
                            name="pricediscount"
                            class="form-control"
                            value="{{ old('pricediscount', $product->pricediscount) }}">
+                    @error('pricediscount')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="mb-3">
@@ -109,6 +123,9 @@
                     <textarea name="description"
                               rows="4"
                               class="form-control">{{ old('description', $product->description) }}</textarea>
+                    @error('description')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
             </div>

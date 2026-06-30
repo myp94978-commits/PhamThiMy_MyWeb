@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\BrandRequest;
 use App\Models\Brand;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class BrandController extends Controller
@@ -22,33 +22,20 @@ class BrandController extends Controller
         return view('admin.brand.create');
     }
 
-    public function store(Request $request)
+    public function store(BrandRequest $request)
     {
         try {
 
-            $request->validate([
-                'brandname' => 'required|string|max:50|unique:brands,brandname',
-                'slug' => 'nullable|string|max:150|unique:brands,slug',
-                'image' => 'nullable|string|max:255',
-                'status' => 'nullable|in:0,1',
-                'sort_order' => 'nullable|integer|min:0',
-                'description' => 'nullable|string',
+            Brand::create([
+                'brandname' => $request->brandname,
+                'slug' => $request->slug ?: Str::slug($request->brandname),
+                'description' => $request->description,
+                'status' => $request->status,
             ]);
 
-            $data = $request->only([
-                'brandname',
-                'image',
-                'status',
-                'sort_order',
-                'description'
-            ]);
-
-            $data['slug'] = $request->slug ?: Str::slug($request->brandname);
-
-            Brand::create($data);
-
-            return redirect('/admin/brand')
-                ->with('success', 'Đã thêm Brand mới.');
+            return redirect()
+                ->route('admin.brand.index')
+                ->with('success', 'Thêm thương hiệu thành công');
 
         } catch (\Exception $e) {
 
@@ -67,40 +54,39 @@ class BrandController extends Controller
 
     public function edit($id)
     {
-        $brand = Brand::findOrFail($id);
+        $brand = Brand::find($id);
+
+        if (! $brand) {
+            return redirect()
+                ->route('admin.brand.index')
+                ->with('error', 'Thương hiệu không tồn tại.');
+        }
 
         return view('admin.brand.edit', compact('brand'));
     }
 
-    public function update(Request $request, $id)
+    public function update(BrandRequest $request, $id)
     {
         try {
 
-            $brand = Brand::findOrFail($id);
+            $brand = Brand::find($id);
 
-            $request->validate([
-                'brandname' => 'required|string|max:50|unique:brands,brandname,' . $brand->id,
-                'slug' => 'nullable|string|max:150|unique:brands,slug,' . $brand->id,
-                'image' => 'nullable|string|max:255',
-                'status' => 'nullable|in:0,1',
-                'sort_order' => 'nullable|integer|min:0',
-                'description' => 'nullable|string',
+            if (! $brand) {
+                return redirect()
+                    ->route('admin.brand.index')
+                    ->with('error', 'Thương hiệu không tồn tại.');
+            }
+
+            $brand->update([
+                'brandname' => $request->brandname,
+                'slug' => $request->slug ?: Str::slug($request->brandname),
+                'description' => $request->description,
+                'status' => $request->status,
             ]);
 
-            $data = $request->only([
-                'brandname',
-                'image',
-                'status',
-                'sort_order',
-                'description'
-            ]);
-
-            $data['slug'] = $request->slug ?: Str::slug($request->brandname);
-
-            $brand->update($data);
-
-            return redirect('/admin/brand')
-                ->with('success', 'Đã cập nhật Brand.');
+            return redirect()
+                ->route('admin.brand.index')
+                ->with('success', 'Cập nhật thương hiệu thành công');
 
         } catch (\Exception $e) {
 
@@ -118,13 +104,16 @@ class BrandController extends Controller
 
             $brand->delete();
 
-            return redirect('/admin/brand')
-                ->with('success', 'Đã xóa Brand.');
+            return redirect()
+                ->route('admin.brand.index')
+                ->with('success', 'Xóa thương hiệu thành công');
 
         } catch (\Exception $e) {
 
-            return redirect('/admin/brand')
+            return redirect()
+                ->route('admin.brand.index')
                 ->with('error', $e->getMessage());
         }
     }
 }
+

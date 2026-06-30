@@ -55,12 +55,12 @@
             </td>
 
             <td>
-    <a href="{{ route('admin.brand.edit', $item->id) }}"
+    <a href="{{ route('admin.product.edit', $item->id) }}"
        class="btn btn-sm btn-success">
         <i class="fas fa-edit"></i>
     </a>
 
-    <form action="{{ route('admin.brand.destroy', $item->id) }}"
+    <form action="{{ route('admin.product.destroy', $item->id) }}"
           method="POST"
           style="display:inline;">
         @csrf
