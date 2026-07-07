@@ -7,8 +7,11 @@ use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\ProductImage;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -44,7 +47,14 @@ class ProductController extends Controller
 {
     try {
 
-        Product::create([
+        $imageName = null;
+        if ($request->hasFile('img')) {
+            $file = $request->file('img');
+            $imageName = Str::slug($request->productname) . '-' . time() . '.' . $file->extension();
+            $file->storeAs('products', $imageName, 'public');
+        }
+
+        $product = Product::create([
             'productname'   => $request->productname,
             'slug'          => $request->slug,
             'cateid'        => $request->cateid,
@@ -53,7 +63,19 @@ class ProductController extends Controller
             'pricediscount' => $request->pricediscount ?? 0,
             'description'   => $request->description,
             'status'        => $request->status,
+            'image'         => $imageName,
         ]);
+
+        if ($request->hasFile('imgs')) {
+            foreach ($request->file('imgs') as $index => $file) {
+                $secondaryName = Str::slug($request->productname) . '-' . time() . '-' . ($index + 1) . '.' . $file->extension();
+                $file->storeAs('product_images', $secondaryName, 'public');
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image' => $secondaryName,
+                ]);
+            }
+        }
 
         return redirect()
             ->route('admin.product.index')
@@ -74,14 +96,13 @@ class ProductController extends Controller
 
    public function edit($id)
 {
-    $product = Product::find($id);
+    $product = Product::with('images')->findOrFail($id);
 
     $categories = Category::all();
 
     $brands = Brand::all();
 
-    return view('admin.product.edit',
-    compact('product','categories','brands'));
+    return view('admin.product.edit', compact('product','categories','brands'));
 }
 
   public function update(ProductRequest $request, string $id)
@@ -95,16 +116,37 @@ class ProductController extends Controller
                 ->with('error', 'Sản phẩm không tồn tại');
         }
 
-        $product->update([
-            'productname'   => $request->productname,
-            'slug'          => $request->slug,
-            'cateid'        => $request->cateid,
-            'brandid'       => $request->brandid,
-            'price'         => $request->price,
-            'pricediscount' => $request->pricediscount,
-            'status'        => $request->status,
-            'description'   => $request->description
-        ]);
+        if ($request->hasFile('img')) {
+            if ($product->image) {
+                Storage::disk('public')->delete('products/'.$product->image);
+            }
+
+            $file = $request->file('img');
+            $imageName = Str::slug($request->productname) . '-' . time() . '.' . $file->extension();
+            $file->storeAs('products', $imageName, 'public');
+            $product->image = $imageName;
+        }
+
+        $product->productname   = $request->productname;
+        $product->slug          = $request->slug;
+        $product->cateid        = $request->cateid;
+        $product->brandid       = $request->brandid;
+        $product->price         = $request->price;
+        $product->pricediscount = $request->pricediscount;
+        $product->status        = $request->status;
+        $product->description   = $request->description;
+        $product->save();
+
+        if ($request->hasFile('imgs')) {
+            foreach ($request->file('imgs') as $index => $file) {
+                $secondaryName = Str::slug($request->productname) . '-' . time() . '-' . ($index + 1) . '.' . $file->extension();
+                $file->storeAs('product_images', $secondaryName, 'public');
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image' => $secondaryName,
+                ]);
+            }
+        }
 
         return redirect()
             ->route('admin.product.index')
@@ -116,7 +158,24 @@ class ProductController extends Controller
             ->withInput()
             ->with('error', $e->getMessage());
     }
-}    public function destroy($id)
+}
+
+    public function destroyImage($productId, $imageId)
+    {
+        $product = Product::findOrFail($productId);
+        $image = ProductImage::where('product_id', $product->id)
+            ->where('id', $imageId)
+            ->firstOrFail();
+
+        Storage::disk('public')->delete('product_images/'.$image->image);
+        $image->delete();
+
+        return redirect()
+            ->route('admin.product.edit', $product->id)
+            ->with('success', 'Đã xóa ảnh phụ thành công.');
+    }
+
+    public function destroy($id)
 {
     try {
 

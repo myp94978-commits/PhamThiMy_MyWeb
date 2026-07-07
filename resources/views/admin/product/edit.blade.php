@@ -9,7 +9,7 @@
 
     <x-admin.alert />
 
-    <form action="{{ route('admin.product.update', $product->id) }}" method="POST">
+    <form action="{{ route('admin.product.update', $product->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -128,6 +128,51 @@
                     @enderror
                 </div>
 
+                <div class="mb-3 img-group">
+                    <label>Ảnh chính</label>
+
+                    @if($product->image)
+                        <div class="mb-2">
+                            <img src="{{ asset('storage/products/'.$product->image) }}" width="150" class="img-thumbnail" alt="{{ $product->productname }}">
+                        </div>
+                    @endif
+
+                    <input type="file" name="img" class="form-control img-input">
+                    <div class="img-preview mt-2"></div>
+                    @error('img')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-3 img-group">
+                    <label>Ảnh phụ</label>
+
+                    @if($product->images->count())
+                        <div class="mb-2">
+                            @foreach($product->images as $image)
+                                <div class="d-inline-block text-center me-2 mb-2" style="width:120px;">
+                                    <img src="{{ asset('storage/product_images/'.$image->image) }}" class="img-thumbnail mb-1" width="100" alt="Ảnh phụ">
+                                    <form action="{{ route('admin.product.images.destroy', ['product' => $product->id, 'image' => $image->id]) }}"
+                                          method="POST"
+                                          onsubmit="return confirm('Bạn có chắc muốn xóa ảnh phụ này?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger w-100">Xóa</button>
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <input type="file" name="imgs[]" class="form-control img-input" multiple>
+                    <div class="img-preview mt-2"></div>
+                    @error('imgs')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                    @enderror
+                    @error('imgs.*')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
             </div>
 
         </div>

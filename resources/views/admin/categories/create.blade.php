@@ -18,7 +18,7 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.categories.store') }}" method="POST">
+    <form action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         <!-- Tên loại sản phẩm -->
@@ -60,6 +60,21 @@
                 rows="4">{{ old('description') }}</textarea>
 
             @error('description')
+                <span class="text-danger">{{ $message }}</span>
+            @enderror
+        </div>
+
+        <!-- Hình ảnh -->
+        <div class="mb-3 img-group">
+            <label>Hình ảnh</label>
+            <input
+                type="file"
+                name="img"
+                class="form-control img-input">
+
+            <div class="img-preview mt-2"></div>
+
+            @error('img')
                 <span class="text-danger">{{ $message }}</span>
             @enderror
         </div>

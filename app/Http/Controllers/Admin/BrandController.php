@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\BrandRequest;
 use App\Models\Brand;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class BrandController extends Controller
 {
@@ -26,10 +27,19 @@ class BrandController extends Controller
     {
         try {
 
+            $imagePath = null;
+            if ($request->hasFile('img')) {
+                $file = $request->file('img');
+                $fileName = Str::slug($request->brandname) . '-' . time() . '.' . $file->extension();
+                $file->storeAs('brands', $fileName, 'public');
+                $imagePath = 'brands/' . $fileName;
+            }
+
             Brand::create([
                 'brandname' => $request->brandname,
                 'slug' => $request->slug ?: Str::slug($request->brandname),
                 'description' => $request->description,
+                'image' => $imagePath,
                 'status' => $request->status,
             ]);
 
@@ -69,12 +79,19 @@ class BrandController extends Controller
     {
         try {
 
-            $brand = Brand::find($id);
+            $brand = Brand::findOrFail($id);
 
-            if (! $brand) {
-                return redirect()
-                    ->route('admin.brand.index')
-                    ->with('error', 'Thương hiệu không tồn tại.');
+            $fileName = $brand->image;
+
+            if ($request->hasFile('img')) {
+                if ($fileName) {
+                    Storage::disk('public')->delete($fileName);
+                }
+
+                $file = $request->file('img');
+                $newFileName = Str::slug($request->brandname) . '-' . time() . '.' . $file->extension();
+                $file->storeAs('brands', $newFileName, 'public');
+                $fileName = 'brands/' . $newFileName;
             }
 
             $brand->update([
@@ -82,6 +99,7 @@ class BrandController extends Controller
                 'slug' => $request->slug ?: Str::slug($request->brandname),
                 'description' => $request->description,
                 'status' => $request->status,
+                'image' => $fileName,
             ]);
 
             return redirect()

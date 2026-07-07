@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
@@ -43,6 +45,7 @@ class CategoryController extends Controller
                     'regex:/^[a-z0-9-]+$/'
                 ],
                 'description' => 'nullable|max:255',
+                'img' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:200',
                 'status' => 'required|in:0,1',
             ],
             [
@@ -51,22 +54,34 @@ class CategoryController extends Controller
                 'max' => ':attribute không vượt quá :max ký tự.',
                 'unique' => ':attribute đã tồn tại.',
                 'slug.regex' => ':attribute chỉ được chứa chữ thường, số và dấu gạch ngang (-).',
+                'img.image' => ':attribute phải là hình ảnh.',
+                'img.mimes' => ':attribute chỉ chấp nhận các định dạng: jpg, jpeg, png, webp.',
+                'img.max' => ':attribute không được vượt quá 200 KB.',
                 'status.in' => ':attribute không hợp lệ.',
             ],
             [
                 'catename' => 'Tên loại',
                 'slug' => 'Đường dẫn (Slug)',
                 'description' => 'Mô tả',
+                'img' => 'Hình ảnh',
                 'status' => 'Trạng thái',
             ]
         );
 
         try {
 
+            $imageName = null;
+            if ($request->hasFile('img')) {
+                $file = $request->file('img');
+                $imageName = Str::slug($request->catename) . '-' . time() . '.' . $file->extension();
+                $file->storeAs('categories', $imageName, 'public');
+            }
+
             Category::create([
                 'catename' => $request->catename,
                 'slug' => $request->slug,
                 'description' => $request->description,
+                'image' => $imageName,
                 'status' => $request->status
             ]);
 
@@ -114,7 +129,7 @@ class CategoryController extends Controller
                 ],
 
                 'description' => 'nullable|max:255',
-
+                'img' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:200',
                 'status' => 'required|in:0,1',
             ],
             [
@@ -123,12 +138,16 @@ class CategoryController extends Controller
                 'max' => ':attribute không vượt quá :max ký tự.',
                 'unique' => ':attribute đã tồn tại.',
                 'slug.regex' => ':attribute chỉ được chứa chữ thường, số và dấu gạch ngang (-).',
+                'img.image' => ':attribute phải là hình ảnh.',
+                'img.mimes' => ':attribute chỉ chấp nhận các định dạng: jpg, jpeg, png, webp.',
+                'img.max' => ':attribute không được vượt quá 200 KB.',
                 'status.in' => ':attribute không hợp lệ.',
             ],
             [
                 'catename' => 'Tên loại',
                 'slug' => 'Đường dẫn (Slug)',
                 'description' => 'Mô tả',
+                'img' => 'Hình ảnh',
                 'status' => 'Trạng thái',
             ]
         );
@@ -136,11 +155,23 @@ class CategoryController extends Controller
         try {
 
             $item = Category::findOrFail($id);
+            $imageName = $item->image;
+
+            if ($request->hasFile('img')) {
+                if ($imageName) {
+                    Storage::disk('public')->delete('categories/'.$imageName);
+                }
+
+                $file = $request->file('img');
+                $imageName = Str::slug($request->catename) . '-' . time() . '.' . $file->extension();
+                $file->storeAs('categories', $imageName, 'public');
+            }
 
             $item->update([
                 'catename' => $request->catename,
                 'slug' => $request->slug,
                 'description' => $request->description,
+                'image' => $imageName,
                 'status' => $request->status
             ]);
 

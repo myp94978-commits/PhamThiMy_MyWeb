@@ -24,6 +24,7 @@
     <thead>
         <tr>
             <th>STT</th>
+            <th>Ảnh</th>
             <th>Tên sản phẩm</th>
             <th>Loại sản phẩm</th>
             <th>Thương hiệu</th>
@@ -38,7 +39,15 @@
         <tr>
             <td>{{ $list->firstItem() + $loop->index }}</td>
 
-            <td>{{ $item->productname }}</td>
+            <td>
+                @if($item->image)
+                    <img src="{{ asset('storage/products/'.$item->image) }}" width="60" class="img-thumbnail" alt="{{ $item->productname }}">
+                @else
+                    <span class="text-muted">Chưa có</span>
+                @endif
+            </td>
+
+            <td></td>{{ $item->productname }}</td>
 
             <td>{{ $item->category?->catename }}</td>
 

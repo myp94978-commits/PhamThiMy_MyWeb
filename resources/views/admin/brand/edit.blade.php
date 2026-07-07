@@ -18,7 +18,7 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.brand.update', $brand->id) }}" method="POST">
+    <form action="{{ route('admin.brand.update', $brand->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -47,6 +47,28 @@
                 value="{{ old('slug', $brand->slug) }}">
 
             @error('slug')
+                <span class="text-danger">{{ $message }}</span>
+            @enderror
+        </div>
+
+        <!-- Hình ảnh -->
+        <div class="mb-3 img-group">
+            <label>Hình ảnh</label>
+
+            @if($brand->image)
+                <div class="mb-2">
+                    <img src="{{ asset('storage/'.$brand->image) }}" width="150" class="img-thumbnail" alt="{{ $brand->brandname }}">
+                </div>
+            @endif
+
+            <input
+                type="file"
+                name="img"
+                class="form-control img-input">
+
+            <div class="img-preview mt-2"></div>
+
+            @error('img')
                 <span class="text-danger">{{ $message }}</span>
             @enderror
         </div>

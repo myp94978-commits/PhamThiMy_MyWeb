@@ -34,7 +34,11 @@
             <td>{{ $key + 1 }}</td>
 
             <td>
-                <img src="{{ asset('images/default.png') }}" width="60">
+                @if($item->image)
+                    <img src="{{ asset('storage/categories/'.$item->image) }}" width="60" alt="{{ $item->catename }}">
+                @else
+                    <img src="{{ asset('images/default.png') }}" width="60" alt="no image">
+                @endif
             </td>
 
             <td>{{ $item->cateid }}</td>

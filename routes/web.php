@@ -38,6 +38,8 @@ Route::get('/demo6/{param1}/{param2}', [DemoController::class, 'index6']);
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::resource('brand', BrandController::class);
+    Route::delete('product/{product}/images/{image}', [ProductController::class, 'destroyImage'])
+        ->name('product.images.destroy');
     Route::resource('product', ProductController::class);
     Route::resource('user', UserController::class);
     Route::resource('post', PostController::class);
