@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\AuthController;
 
 
 Route::get('/', function () {
@@ -18,10 +19,35 @@ Route::get('/test1', [ProductController::class, 'test1']);
 Route::get('/test2', [ProductController::class, 'test2']);
 
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('home');
-    Route::get('/test1', [ProductController::class, 'test1'])->name('test1');
-    Route::get('/test2', [ProductController::class, 'test2'])->name('test2');
+    // Authentication
+    Route::get('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/login', [AuthController::class, 'postLogin'])->name('login.post');
+    Route::get('/forgotpass', [AuthController::class, 'forgotPassword'])->name('forgotpass');
+    Route::post('/forgotpass', [AuthController::class, 'postForgotPassword'])->name('forgotpass.post');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset.post');
+
+    Route::middleware('auth')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::get('/change-password', [AuthController::class, 'changePassword'])->name('change-password');
+        Route::post('/change-password', [AuthController::class, 'postChangePassword'])->name('change-password.post');
+
+        // Dashboard
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/test1', [ProductController::class, 'test1'])->name('test1');
+        Route::get('/test2', [ProductController::class, 'test2'])->name('test2');
+
+        // CRUD - Resource route
+        Route::resource('categories', CategoryController::class);
+        Route::resource('brand', BrandController::class);
+        Route::delete('product/{product}/images/{image}', [ProductController::class, 'destroyImage'])
+            ->name('product.images.destroy');
+        Route::resource('product', ProductController::class);
+        Route::resource('user', UserController::class);
+        Route::resource('post', PostController::class);
+    });
 });
+
 Route::get('/test', function () {
   return view('admin.layout.admin');
 });
@@ -34,13 +60,4 @@ Route::get('/demo4/{id}', [DemoController::class, 'index4']);
 Route::get('/demo5/{id?}', [DemoController::class, 'index5']);
 Route::get('/demo6/{param1}/{param2}', [DemoController::class, 'index6']);
 
-
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('categories', CategoryController::class);
-    Route::resource('brand', BrandController::class);
-    Route::delete('product/{product}/images/{image}', [ProductController::class, 'destroyImage'])
-        ->name('product.images.destroy');
-    Route::resource('product', ProductController::class);
-    Route::resource('user', UserController::class);
-    Route::resource('post', PostController::class);
-});
+// (debug route removed)

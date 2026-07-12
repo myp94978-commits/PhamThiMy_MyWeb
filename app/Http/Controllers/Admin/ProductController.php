@@ -194,7 +194,7 @@ class ProductController extends Controller
 }
     public function test1(): RedirectResponse
     {
-        return redirect()->route('admin.home');
+        return redirect()->route('admin.dashboard');
     }
 
     public function test2(): RedirectResponse

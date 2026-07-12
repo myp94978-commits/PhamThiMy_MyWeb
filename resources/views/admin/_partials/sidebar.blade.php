@@ -1,5 +1,5 @@
 <div class="admin-sidebar">
-    <a href="{{ route('admin.home') }}" class="brand">
+    <a href="{{ route('admin.dashboard') }}" class="brand">
         <i class="bi bi-speedometer2"></i>
         <span>Admin</span>
     </a>
@@ -7,9 +7,16 @@
     <ul class="nav-list">
 
         <li>
-            <a class="{{ request()->routeIs('admin.home') ? 'active' : '' }}"
-               href="{{ route('admin.home') }}">
+            <a class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+               href="{{ route('admin.dashboard') }}">
                 <i class="bi bi-house-door"></i> Dashboard
+            </a>
+        </li>
+
+        <li>
+            <a class="{{ request()->routeIs('admin.change-password') ? 'active' : '' }}"
+               href="{{ route('admin.change-password') }}">
+                <i class="bi bi-key-fill"></i> Đổi mật khẩu
             </a>
         </li>
 

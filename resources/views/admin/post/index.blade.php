@@ -17,19 +17,28 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($list as $key => $item)
+            @forelse($list as $key => $item)
             <tr>
                 <td>{{ $key + 1 }}</td>
 
                 <td>
-                    <img src="{{ asset('images/default.png') }}" width="60">
+                    @php
+                        $img = $item->image ?? '';
+                        $imgPath = public_path('images/' . $img);
+                        $imgUrl = ( $img && file_exists($imgPath) ) ? asset('images/' . $img) : asset('images/default.png');
+                    @endphp
+                    <img src="{{ $imgUrl }}" width="60" alt="">
                 </td>
 
                 <td>{{ $item->title }}</td>
                 <td>{{ $item->username }}</td>
-                <td>{{ $item->created_at }}</td>
+                <td>{{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}</td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="5" class="text-center">Không có bài viết</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 </div>

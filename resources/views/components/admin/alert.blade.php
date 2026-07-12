@@ -15,3 +15,22 @@
         {{ session('error') }}
     </div>
 @endif
+
+{{-- Hiển thị thông báo từ session flash --}}
+@if (session('message'))
+    <div class="alert alert-danger">
+        {{ session('message') }}
+    </div>
+@endif
+
+{{-- Hiển thị thông báo thành công --}}
+@if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+        @if (session('reset_link'))
+            <div class="mt-2">
+                <a href="{{ session('reset_link') }}" class="link-primary">Nhấp vào đây để đổi mật khẩu</a>
+            </div>
+        @endif
+    </div>
+@endif
