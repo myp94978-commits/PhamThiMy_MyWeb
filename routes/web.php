@@ -66,8 +66,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('post', PostController::class);
         });
 
-        // Allow role 2 (user) to access product index only
-        Route::resource('product', ProductController::class)->only(['index'])->middleware('roles:2');
+        // Allow role 1 (admin) and role 2 (user) to access product index
+        Route::resource('product', ProductController::class)->only(['index'])->middleware('roles:1,2');
     });
 });
 
