@@ -21,6 +21,14 @@
             </div>
 
             <div class="mb-3">
+                <label for="otp" class="form-label">Mã OTP</label>
+                <input type="text" class="form-control" id="otp" name="otp" value="{{ old('otp') }}" placeholder="Nhập mã OTP từ email">
+                @error('otp')
+                    <div class="text-danger mt-1">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
                 <label for="password" class="form-label">Mật khẩu mới</label>
                 <input type="password" class="form-control" id="password" name="password" placeholder="Nhập mật khẩu mới">
                 @error('password')

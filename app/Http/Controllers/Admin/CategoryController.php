@@ -206,4 +206,109 @@ class CategoryController extends Controller
                 ->with('error', $e->getMessage());
         }
     }
+
+    /**
+     * Display list of soft-deleted categories (trash)
+     */
+    public function trash($limit = 10)
+    {
+        $list = Category::onlyTrashed()
+            ->select('cateid', 'catename', 'slug', 'description', 'image', 'status', 'deleted_at')
+            ->orderBy('catename')
+            ->paginate($limit);
+
+        return view('admin.categories.trash', compact('list'));
+    }
+
+    /**
+     * Restore all soft-deleted categories
+     */
+    public function restoreAll()
+    {
+        try {
+            $items = Category::onlyTrashed()->get();
+            if ($items->isEmpty()) {
+                return redirect()->route('admin.categories.trash')->with('error', 'Không có mục nào để khôi phục.');
+            }
+
+            foreach ($items as $item) {
+                $item->restore();
+            }
+
+            return redirect()->route('admin.categories.trash')->with('success', 'Khôi phục tất cả thành công.');
+        } catch (\Exception $e) {
+            Log::error('Category restoreAll failed: '.$e->getMessage());
+            Log::error($e->getTraceAsString());
+            return redirect()->back()->with('error', 'Khôi phục thất bại.');
+        }
+    }
+
+    /**
+     * Permanently delete all soft-deleted categories
+     */
+    public function forceDeleteAll()
+    {
+        try {
+            $items = Category::onlyTrashed()->get();
+            if ($items->isEmpty()) {
+                return redirect()->route('admin.categories.trash')->with('error', 'Không có mục nào để xóa vĩnh viễn.');
+            }
+
+            foreach ($items as $item) {
+                if ($item->image) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete('categories/'.$item->image);
+                }
+                $item->forceDelete();
+            }
+
+            return redirect()->route('admin.categories.trash')->with('success', 'Xóa vĩnh viễn tất cả thành công.');
+        } catch (\Exception $e) {
+            Log::error('Category forceDeleteAll failed: '.$e->getMessage());
+            Log::error($e->getTraceAsString());
+            return redirect()->back()->with('error', 'Xóa vĩnh viễn thất bại.');
+        }
+    }
+
+    /**
+     * Restore a soft-deleted category
+     */
+    public function restore($id)
+    {
+        try {
+            Category::onlyTrashed()->findOrFail($id)->restore();
+
+            return redirect()
+                ->route('admin.categories.trash')
+                ->with('success', 'Khôi phục thành công.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'Thực hiện thất bại.');
+        }
+    }
+
+    /**
+     * Permanently delete a soft-deleted category
+     */
+    public function forceDelete($id)
+    {
+        try {
+            $item = Category::onlyTrashed()->findOrFail($id);
+
+            // delete stored image if exists
+            if ($item->image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete('categories/'.$item->image);
+            }
+
+            $item->forceDelete();
+
+            return redirect()
+                ->route('admin.categories.trash')
+                ->with('success', 'Xóa vĩnh viễn thành công.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'Thực hiện thất bại.');
+        }
+    }
 }

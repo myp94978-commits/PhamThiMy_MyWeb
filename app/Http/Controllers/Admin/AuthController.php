@@ -4,10 +4,18 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\AdminRandomPasswordNotification;
+use App\Notifications\AdminResetPasswordNotification;
+use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
@@ -30,9 +38,9 @@ class AuthController extends Controller
         $request->validate([
             'username' => 'required',
             'password' => 'required',
-        ],[
+        ], [
             'required' => ':attribute không được để trống',
-        ],[
+        ], [
             'username' => 'Tên đăng nhập hoặc email',
             'password' => 'Mật khẩu',
         ]);
@@ -58,6 +66,12 @@ class AuthController extends Controller
         // Nếu biến $remember có giá trị true (nếu người dùng chọn nhớ tài khoản)
         $remember = $request->has('remember') ? true : false;
         Auth::login($user, $remember);
+        // Nếu người dùng được yêu cầu đổi mật khẩu thì chuyển hướng tới trang đổi mật khẩu
+        if ($user->force_change_password) {
+            return redirect()->route('admin.change-password')
+                ->with('message', 'Bạn cần đổi mật khẩu tạm thời vừa được gửi qua email.');
+        }
+
         // ... Nếu không có sự định hướng về URL mà người dùng muốn truy cập
         // được khai báo trước (route name dashboard được khai báo trong web.php)
         return redirect()->intended(route('admin.dashboard'));
@@ -86,21 +100,21 @@ class AuthController extends Controller
     }
 
     // Xử lý đổi mật khẩu
-    public function postChangePassword(\Illuminate\Http\Request $request)
+    public function postChangePassword(Request $request)
     {
         $request->validate([
             'old_password' => 'required',
             'password' => 'required|min:8|confirmed',
-        ],[
+        ], [
             'required' => ':attribute không được để trống',
             'min' => ':attribute phải có ít nhất :min ký tự',
             'confirmed' => 'Xác nhận mật khẩu không khớp',
-        ],[
+        ], [
             'old_password' => 'Mật khẩu cũ',
             'password' => 'Mật khẩu mới',
         ]);
 
-        $user = Auth::user();
+        $user = User::findOrFail(Auth::id());
         if (!Hash::check($request->old_password, $user->password)) {
             return back()->with('message', 'Mật khẩu cũ không đúng');
         }
@@ -110,6 +124,8 @@ class AuthController extends Controller
         }
 
         $user->password = Hash::make($request->password);
+        // Clear the force_change_password flag after successful update
+        $user->force_change_password = 0;
         $user->save();
 
         return back()->with('success', 'Đổi mật khẩu thành công');
@@ -125,24 +141,47 @@ class AuthController extends Controller
     public function postForgotPassword(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email',
-        ],[
-            'required' => ':attribute không được để trống',
-            'email' => ':attribute phải là email hợp lệ',
-            'exists' => ':attribute không tồn tại trong hệ thống',
-        ],[
-            'email' => 'Email',
+            'email' => 'required|email',
+            'action' => 'required|in:random_password,reset_link',
+        ], [
+            'email.required' => 'Email không được để trống',
+            'email.email' => 'Email không đúng định dạng',
+            'action.required' => 'Vui lòng chọn hành động',
+            'action.in' => 'Hành động không hợp lệ',
         ]);
 
         $user = User::where('email', $request->email)->first();
         if (!$user) {
-            return back()->with('message', 'Email không tồn tại');
+            return back()
+                ->with('message', 'Email không tồn tại')
+                ->withInput();
         }
 
-        $token = Password::broker()->createToken($user);
-        $resetUrl = route('admin.password.reset', ['token' => $token, 'email' => $request->email]);
 
-        return back()->with('success', 'Liên kết đặt lại mật khẩu đã được tạo.')->with('reset_link', $resetUrl);
+        // Tạo mật khẩu mới
+        $passrandom = Str::random(10);
+        // Mã hóa mật khẩu
+        $passencrypted = Hash::make($passrandom);
+        // Lưu vào DB
+        $user->update([
+            'password' => $passencrypted
+        ]);
+
+
+
+
+        // Nội dung email
+        $html = "<h2>Mật khẩu mới của bạn là: $passrandom</h2>
+        <p>Vui lòng đổi mật khẩu sau khi đăng nhập.</p>";
+        // Gửi email
+        Mail::html($html, function ($message) use ($request) {
+            $message->to($request->email)
+                ->subject('Đặt lại mật khẩu');
+        });
+        
+        // điều hướng về page forgot kèm thông báo
+        return back()
+            ->with('message', 'Đã Gửi mật khẩu mới. Bạn vui lòng kiểm tra email của bạn');
     }
 
     public function showResetPasswordForm(Request $request, string $token)
@@ -158,20 +197,45 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email|exists:users,email',
             'token' => 'required',
+            'otp' => 'required|digits:6',
             'password' => 'required|min:8|confirmed',
-        ],[
+        ], [
             'required' => ':attribute không được để trống',
             'email' => ':attribute phải là email hợp lệ',
+            'otp.digits' => 'OTP phải gồm 6 chữ số',
             'min' => ':attribute phải có ít nhất :min ký tự',
             'confirmed' => 'Xác nhận mật khẩu không khớp',
             'exists' => ':attribute không tồn tại trong hệ thống',
-        ],[
+        ], [
             'email' => 'Email',
             'token' => 'Token',
+            'otp' => 'OTP',
             'password' => 'Mật khẩu mới',
         ]);
 
-        $status = Password::broker()->reset(
+        $passwordsTable = config('auth.passwords.' . config('auth.defaults.passwords') . '.table');
+        $user = User::where('email', $request->email)->firstOrFail();
+        $tokenRecord = DB::table($passwordsTable)
+            ->where('email', $request->email)
+            ->first();
+
+        /** @var PasswordBroker $broker */
+        $broker = app('auth.password.broker');
+
+        if (!$tokenRecord || ! $broker->tokenExists($user, $request->token)) {
+            return back()->with('message', 'Token không hợp lệ hoặc đã hết hạn.');
+        }
+
+        if (!isset($tokenRecord->otp) || $tokenRecord->otp !== $request->otp) {
+            return back()->with('message', 'OTP không đúng.');
+        }
+
+        $expireMinutes = config('auth.passwords.' . config('auth.defaults.passwords') . '.expire');
+        if (Carbon::parse($tokenRecord->created_at)->addMinutes($expireMinutes)->isPast()) {
+            return back()->with('message', 'Token hoặc OTP đã hết hạn. Vui lòng yêu cầu lại.');
+        }
+
+        $status = $broker->reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user, string $password) {
                 $user->password = Hash::make($password);

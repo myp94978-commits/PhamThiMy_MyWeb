@@ -38,13 +38,36 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/test2', [ProductController::class, 'test2'])->name('test2');
 
         // CRUD - Resource route
-        Route::resource('categories', CategoryController::class);
-        Route::resource('brand', BrandController::class);
-        Route::delete('product/{product}/images/{image}', [ProductController::class, 'destroyImage'])
-            ->name('product.images.destroy');
-        Route::resource('product', ProductController::class);
-        Route::resource('user', UserController::class);
-        Route::resource('post', PostController::class);
+        Route::middleware('roles:1')->group(function () {
+            // Restore and force-delete routes for soft-deleted categories
+            Route::patch('categories/{id}/restore', [CategoryController::class, 'restore'])
+                ->name('categories.restore');
+
+            // Restore all / Force delete all
+            Route::patch('categories/restore-all', [CategoryController::class, 'restoreAll'])
+                ->name('categories.restoreAll');
+
+            Route::delete('categories/forcedelete-all', [CategoryController::class, 'forceDeleteAll'])
+                ->name('categories.forceDeleteAll');
+
+            Route::delete('categories/{id}/forcedelete', [CategoryController::class, 'forceDelete'])
+                ->name('categories.forceDelete');
+
+            // Soft delete trash route
+            Route::get('trash/categories', [CategoryController::class, 'trash'])
+                ->name('categories.trash');
+            Route::resource('categories', CategoryController::class);
+            Route::resource('brand', BrandController::class);
+            Route::delete('product/{product}/images/{image}', [ProductController::class, 'destroyImage'])
+                ->name('product.images.destroy');
+            // full product resource for admin (role 1)
+            Route::resource('product', ProductController::class)->except(['index']);
+            Route::resource('user', UserController::class);
+            Route::resource('post', PostController::class);
+        });
+
+        // Allow role 2 (user) to access product index only
+        Route::resource('product', ProductController::class)->only(['index'])->middleware('roles:2');
     });
 });
 
@@ -61,3 +84,5 @@ Route::get('/demo5/{id?}', [DemoController::class, 'index5']);
 Route::get('/demo6/{param1}/{param2}', [DemoController::class, 'index6']);
 
 // (debug route removed)
+
+// (temporary debug route removed)

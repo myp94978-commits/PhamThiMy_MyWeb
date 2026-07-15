@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    use Notifiable;
+
     protected $table = 'users';
     
     protected $primaryKey = 'id';
@@ -22,6 +25,7 @@ class User extends Authenticatable
         'role',
         'status',
         'remember_token',
+        'force_change_password',
     ];
 
     protected $hidden = [

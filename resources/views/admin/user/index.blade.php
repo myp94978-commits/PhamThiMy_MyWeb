@@ -4,7 +4,10 @@
 
 @section('content')
 <div class="admin-card">
-    <h2>DANH SÁCH NGƯỜI DÙNG</h2>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>DANH SÁCH NGƯỜI DÙNG</h2>
+        <a href="{{ route('admin.user.create') }}" class="btn btn-primary">Thêm người dùng</a>
+    </div>
 
     <table class="table table-bordered">
         <thead>
@@ -46,7 +49,5 @@
     <div class="d-flex justify-content-center">
         {{ $list->links() }}
     </div>
-</div>
-@endsection
 </div>
 @endsection

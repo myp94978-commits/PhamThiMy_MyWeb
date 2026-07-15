@@ -20,6 +20,11 @@
 @if (session('message'))
     <div class="alert alert-danger">
         {{ session('message') }}
+        @if (session('error_detail'))
+            <div class="mt-2 small text-muted">
+                {{ session('error_detail') }}
+            </div>
+        @endif
     </div>
 @endif
 

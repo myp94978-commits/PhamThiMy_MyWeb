@@ -6,9 +6,10 @@
 <div class="admin-card">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="mb-0">DANH SÁCH LOẠI SẢN PHẨM</h2>
-        <a href="{{ route('admin.categories.create') }}" class="btn btn-success">
-        + Thêm mới
-    </a>
+        <div>
+            <a href="{{ route('admin.categories.trash') }}" class="btn btn-secondary me-2">Thùng rác</a>
+            <a href="{{ route('admin.categories.create') }}" class="btn btn-success">+ Thêm mới</a>
+        </div>
     </div>
 
     @if($list->isEmpty())

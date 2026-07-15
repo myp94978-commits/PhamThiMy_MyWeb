@@ -13,23 +13,41 @@
     <div class="container mt-5">
         <form action="{{ route('admin.forgotpass.post') }}" method="POST" class="mx-auto shadow-lg p-4 w-50 bg-light">
             @csrf
-            
+
             <h2>Quên mật khẩu</h2>
-            
+
             <x-admin.alert></x-admin.alert>
-            
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" placeholder="nhập email" 
+
+            <div class="mb-3 mt-3">
+                <label for="f-email">Email</label>
+                <input type="text" class="form-control" id="f-email" placeholder="" 
                        name="email" value="{{ old('email') }}">
-                @error('email')
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Hành động</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="action" id="action-random" value="random_password" {{ old('action') === 'random_password' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="action-random">
+                        Gửi mật khẩu ngẫu nhiên mới qua email
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="action" id="action-reset" value="reset_link" {{ old('action') === 'reset_link' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="action-reset">
+                        Gửi liên kết đặt lại mật khẩu kèm OTP
+                    </label>
+                </div>
+                @error('action')
                     <div class="text-danger mt-1">{{ $message }}</div>
                 @enderror
             </div>
-            
-            <button type="submit" class="btn btn-primary w-100">Gửi liên kết</button>
-            
-            <a href="{{ route('admin.login') }}">Quay lại đăng nhập</a>
+
+            <div class="mb-3 mt-3 d-flex gap-1">
+                <button type="submit" class="btn btn-primary">Gửi</button>
+                <a href="{{ route('admin.login') }}" class="btn btn-warning">Đăng nhập</a>
+            </div>
+
         </form>
     </div>
 </body>
