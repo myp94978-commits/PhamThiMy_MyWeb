@@ -17,4 +17,9 @@ class ProductImage extends Model
     {
         return $this->belongsTo(Product::class, 'product_id', 'id');
     }
+
+    public function getImagePathAttribute()
+    {
+        return $this->attributes['image'] ?? null;
+    }
 }

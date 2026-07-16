@@ -41,6 +41,13 @@
             </a>
         </li>
 
+        <li>
+            <a class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"
+               href="{{ route('admin.orders.index') }}">
+                <i class="bi bi-bag-check"></i> Đơn hàng
+            </a>
+        </li>
+
         <!-- 🔥 POST -->
         <li>
             <a class="{{ request()->routeIs('admin.post.*') ? 'active' : '' }}"

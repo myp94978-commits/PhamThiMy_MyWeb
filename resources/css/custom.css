@@ -178,6 +178,164 @@ textarea.form-control {
     min-height: 120px;
 }
 
+.footer-section {
+    background: #0d1119;
+}
+
+.footer-section .container {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.footer-section h5 {
+    color: #ffffff;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.footer-section p {
+    color: rgba(255, 255, 255, 0.72);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.footer-section .text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.footer-section a:hover,
+.footer-section a:focus {
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+.footer-highlights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.55rem;
+    margin-top: 0.7rem;
+}
+
+.footer-highlight-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.55rem 0.7rem;
+    border-radius: 0.75rem;
+    transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+    min-width: 220px;
+}
+
+.footer-highlight-card:hover {
+    transform: translateY(-0.3px);
+    background-color: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.footer-highlight-card i {
+    min-width: 26px;
+    min-height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.88rem;
+    color: #22d3ee;
+    background: rgba(34, 211, 238, 0.12);
+    border-radius: 0.75rem;
+}
+
+.footer-highlight-card h6,
+.footer-highlight-card p {
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+
+.footer-highlight-card h6 {
+    margin-bottom: 0.1rem;
+    font-size: 0.9rem;
+    line-height: 1.05;
+    color: #ffffff;
+}
+
+.footer-highlight-card p {
+    margin-bottom: 0;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.8rem;
+    line-height: 1.25;
+}
+
+.footer-section .row + hr {
+    border-color: rgba(255, 255, 255, 0.08);
+    margin-top: 0.7rem;
+    margin-bottom: 0.7rem;
+}
+
+.footer-section .text-muted small,
+.footer-section .text-muted {
+    color: rgba(255, 255, 255, 0.62) !important;
+}
+
+.footer-section .social-icons a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.footer-section .social-icons a:hover {
+    background-color: rgba(34, 211, 238, 0.15);
+    color: #22d3ee;
+}
+
+.footer-contact-list {
+    padding-left: 0;
+    list-style: none;
+}
+
+.footer-contact-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.footer-link-list li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-link-list li:last-child {
+    margin-bottom: 0;
+}
+
+.footer-link-list a {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.footer-link-list a:hover {
+    color: #ffffff;
+}
+
+.footer-copy-text {
+    color: rgba(255, 255, 255, 0.68);
+}
+
+.site-topbar {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.site-topbar .topbar-left,
+.site-topbar .topbar-right {
+    font-size: 0.9rem;
+}
+
 select.form-control {
     cursor: pointer;
 }

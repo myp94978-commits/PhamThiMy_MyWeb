@@ -17,5 +17,10 @@ class Brand extends Model
         'image',
         'status'
     ];
+
+    public function getNameAttribute()
+    {
+        return $this->attributes['brandname'] ?? null;
+    }
 }
 

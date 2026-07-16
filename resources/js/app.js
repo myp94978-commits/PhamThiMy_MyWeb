@@ -8,3 +8,9 @@ import 'bootstrap';
 /* . : thư mục hiện tại (resources/js) */
 import './custom';
 import './helpers';
+
+window.addEventListener('DOMContentLoaded', () => {
+    if (window.CartHelper && typeof window.CartHelper.updateUI === 'function') {
+        window.CartHelper.updateUI();
+    }
+});

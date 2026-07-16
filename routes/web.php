@@ -2,21 +2,35 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\DemoController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\ProductController as ClientProductController;
+use App\Http\Controllers\Client\CartController;
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::get('/test1', [ProductController::class, 'test1']);
-Route::get('/test2', [ProductController::class, 'test2']);
+// Client Product Routes (without prefix)
+Route::get('/product', [ClientProductController::class, 'index'])->name('product.index');
+Route::get('/product/{slug}', [ClientProductController::class, 'show'])->name('product.show');
+Route::get('/category/{slug}', [ClientProductController::class, 'category'])->name('products.category');
+Route::get('/brand/{slug}', [ClientProductController::class, 'brand'])->name('product.brand');
+Route::get('/search', [ClientProductController::class, 'search'])->name('product.search');
+Route::get('/contact', function () {
+    return view('client.contact.index');
+})->name('contact');
+
+// Client Cart Routes (without prefix)
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::get('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+Route::post('/api/orders', [CartController::class, 'storeOrder'])->name('cart.storeOrder');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     // Authentication
@@ -34,8 +48,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        Route::get('/test1', [ProductController::class, 'test1'])->name('test1');
-        Route::get('/test2', [ProductController::class, 'test2'])->name('test2');
+        Route::get('/test1', [AdminProductController::class, 'test1'])->name('test1');
+        Route::get('/test2', [AdminProductController::class, 'test2'])->name('test2');
 
         // CRUD - Resource route
         Route::middleware('roles:1')->group(function () {
@@ -58,16 +72,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ->name('categories.trash');
             Route::resource('categories', CategoryController::class);
             Route::resource('brand', BrandController::class);
-            Route::delete('product/{product}/images/{image}', [ProductController::class, 'destroyImage'])
+            Route::delete('product/{product}/images/{image}', [AdminProductController::class, 'destroyImage'])
                 ->name('product.images.destroy');
             // full product resource for admin (role 1)
-            Route::resource('product', ProductController::class)->except(['index']);
+            Route::resource('product', AdminProductController::class)->except(['index']);
+            Route::resource('orders', AdminOrderController::class)->only(['index', 'show']);
+            Route::put('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
+                ->name('orders.status');
             Route::resource('user', UserController::class);
             Route::resource('post', PostController::class);
         });
 
         // Allow role 1 (admin) and role 2 (user) to access product index
-        Route::resource('product', ProductController::class)->only(['index'])->middleware('roles:1,2');
+        Route::resource('product', AdminProductController::class)->only(['index'])->middleware('roles:1,2');
     });
 });
 

@@ -100,6 +100,11 @@ const throttle = (func, limit) => {
     };
 };
 
+if (typeof window !== 'undefined') {
+    window.showToast = showToast;
+    window.formatPrice = formatPrice;
+}
+
 // ============================================
 // 2. DOM MANIPULATION
 // ============================================
@@ -190,10 +195,13 @@ const clearFormErrors = (formId) => {
  * Make AJAX request
  */
 const makeRequest = async (url, options = {}) => {
+        const csrfToken = window.csrfToken || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     const defaultOptions = {
+        credentials: 'same-origin',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Content-Type': 'application/json',
+            ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
         },
     };
 
@@ -250,6 +258,14 @@ const deleteRequest = (url) => {
         method: 'DELETE',
     });
 };
+
+if (typeof window !== 'undefined') {
+    window.makeRequest = makeRequest;
+    window.post = post;
+    window.get = get;
+    window.put = put;
+    window.deleteRequest = deleteRequest;
+}
 
 // ============================================
 // 5. VALIDATION

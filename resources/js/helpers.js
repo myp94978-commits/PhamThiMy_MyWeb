@@ -394,3 +394,12 @@ if (typeof module !== 'undefined' && module.exports) {
         PaginationHelper,
     };
 }
+
+if (typeof window !== 'undefined') {
+    window.CartHelper = CartHelper;
+    window.ProductHelper = ProductHelper;
+    window.FilterHelper = FilterHelper;
+    window.SearchHelper = SearchHelper;
+    window.SortHelper = SortHelper;
+    window.PaginationHelper = PaginationHelper;
+}
