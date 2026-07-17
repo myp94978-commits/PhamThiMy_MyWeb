@@ -19,7 +19,7 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Họ Tên *</label>
                                 <input type="text" class="form-control" name="full_name" required 
-                                       @auth value="{{ auth()->user()->name }}" @endauth>
+                                       @auth value="{{ auth()->user()->fullname }}" @endauth>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Email *</label>
@@ -133,7 +133,7 @@
                         <i class="bi bi-check-circle"></i> Đặt Hàng
                     </button>
                     
-                    <a href="{{ route('cart.index') }}" class="btn btn-outline-secondary w-100 mt-2">
+                    <a href="{{ route('cart.show') }}" class="btn btn-outline-secondary w-100 mt-2">
                         <i class="bi bi-arrow-left"></i> Quay Lại Giỏ Hàng
                     </a>
                 </div>

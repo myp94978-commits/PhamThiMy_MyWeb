@@ -56,9 +56,13 @@
                 <button class="btn btn-primary btn-sm" type="submit">Tìm</button>
             </form>
 
-            <a class="btn btn-outline-secondary btn-sm d-flex align-items-center" href="{{ route('cart.index') }}">
+            <a class="btn btn-outline-secondary btn-sm d-flex align-items-center" href="{{ route('cart.show') }}">
                 <i class="bi bi-cart3 me-2"></i>
-                Giỏ hàng (0)
+                Giỏ hàng (
+                <span class="badge bg-warning text-dark" id="cart-count">
+                    {{ count(session('cart', [])) }}
+                </span>
+                )
             </a>
         </div>
     </div>

@@ -22,9 +22,12 @@ class AuthController extends Controller
     // Hiển thị trang đăng nhập
     public function login()
     {
-        // Kiểm tra xem đã đăng nhập chưa thì chuyển hướng về Dashboard
+        // Nếu đã đăng nhập rồi nhưng không phải admin thì chuyển về home
         if (Auth::check()) {
-            return redirect()->route('admin.dashboard');
+            if (Auth::user()->role === 1) {
+                return redirect()->route('admin.dashboard');
+            }
+            return redirect()->route('home');
         }
 
         return view('admin.auth.login');
@@ -66,15 +69,20 @@ class AuthController extends Controller
         // Nếu biến $remember có giá trị true (nếu người dùng chọn nhớ tài khoản)
         $remember = $request->has('remember') ? true : false;
         Auth::login($user, $remember);
+
+        // Nếu người dùng không phải admin, chuyển về home để giữ logic client hiện tại
+        if ($user->role !== 1) {
+            return redirect()->route('home');
+        }
+
         // Nếu người dùng được yêu cầu đổi mật khẩu thì chuyển hướng tới trang đổi mật khẩu
         if ($user->force_change_password) {
             return redirect()->route('admin.change-password')
                 ->with('message', 'Bạn cần đổi mật khẩu tạm thời vừa được gửi qua email.');
         }
 
-        // ... Nếu không có sự định hướng về URL mà người dùng muốn truy cập
-        // được khai báo trước (route name dashboard được khai báo trong web.php)
-        return redirect()->intended(route('admin.dashboard'));
+        // Nếu đăng nhập thành công, chuyển thẳng về trang Dashboard admin
+        return redirect()->route('admin.dashboard');
     }
 
     // Đăng xuất

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ProductController as ClientProductController;
 use App\Http\Controllers\Client\CartController;
+use App\Http\Controllers\Client\AuthController as ClientAuthController;
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -27,10 +28,21 @@ Route::get('/contact', function () {
     return view('client.contact.index');
 })->name('contact');
 
-// Client Cart Routes (without prefix)
-Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-Route::get('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
-Route::post('/api/orders', [CartController::class, 'storeOrder'])->name('cart.storeOrder');
+// Client Auth Routes
+Route::get('/login', [ClientAuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [ClientAuthController::class, 'login'])->name('login.post');
+Route::get('/register', [ClientAuthController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [ClientAuthController::class, 'register'])->name('register.post');
+Route::post('/logout', [ClientAuthController::class, 'logout'])->name('logout');
+
+// Client Cart Routes
+Route::prefix('cart')->controller(CartController::class)->name('cart.')->group(function () {
+    Route::get('/', 'show')->name('index');
+    Route::get('/show', 'show')->name('show');
+    Route::post('/add/{id}', 'addToCart')->name('add');
+    Route::delete('/remove/{id}', 'removeCart')->name('remove');
+    Route::post('/checkout', 'checkout')->name('checkout');
+});
 
 Route::prefix('admin')->name('admin.')->group(function () {
     // Authentication

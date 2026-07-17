@@ -118,34 +118,37 @@
             </p>
             
             {{-- Quantity & Add to Cart --}}
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="row align-items-center mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Số Lượng:</label>
-                            <div class="input-group" style="max-width: 150px;">
-                                <button class="btn btn-outline-secondary" type="button" id="decreaseQty">-</button>
-                                <input type="number" class="form-control text-center" id="quantity" value="1" min="1">
-                                <button class="btn btn-outline-secondary" type="button" id="increaseQty">+</button>
+            <form action="{{ route('cart.add', $product->id) }}" method="POST" class="form-add-cart">
+                @csrf
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row align-items-center mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Số Lượng:</label>
+                                <div class="input-group" style="max-width: 150px;">
+                                    <button class="btn btn-outline-secondary" type="button" id="decreaseQty">-</button>
+                                    <input type="number" name="quantity" class="form-control text-center" id="quantity" value="1" min="1" step="1" inputmode="numeric" style="width: 70px;">
+                                    <button class="btn btn-outline-secondary" type="button" id="increaseQty">+</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <small class="text-muted d-block">
+                                    Tồn Kho: <strong id="stock">{{ $product->quantity ?? 'N/A' }}</strong>
+                                </small>
                             </div>
                         </div>
-                        <div class="col-md-6 text-md-end">
-                            <small class="text-muted d-block">
-                                Tồn Kho: <strong id="stock">{{ $product->quantity ?? 'N/A' }}</strong>
-                            </small>
+                        
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary btn-lg" type="submit">
+                                <i class="bi bi-cart-plus"></i> Thêm Vào Giỏ Hàng
+                            </button>
+                            <button class="btn btn-outline-primary btn-lg" type="button">
+                                <i class="bi bi-heart"></i> Yêu Thích
+                            </button>
                         </div>
                     </div>
-                    
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-primary btn-lg" id="addToCartBtn">
-                            <i class="bi bi-cart-plus"></i> Thêm Vào Giỏ Hàng
-                        </button>
-                        <button class="btn btn-outline-primary btn-lg">
-                            <i class="bi bi-heart"></i> Yêu Thích
-                        </button>
-                    </div>
                 </div>
-            </div>
+            </form>
             
             {{-- Additional Info --}}
             <div class="card">
@@ -216,54 +219,45 @@
 
 @section('js')
 <script>
-    const quantity = document.getElementById('quantity');
-    const decreaseBtn = document.getElementById('decreaseQty');
-    const increaseBtn = document.getElementById('increaseQty');
-    const addToCartBtn = document.getElementById('addToCartBtn');
-    
-    // Quantity controls
-    decreaseBtn.addEventListener('click', () => {
-        if (parseInt(quantity.value) > 1) {
-            quantity.value = parseInt(quantity.value) - 1;
-        }
-    });
-    
-    increaseBtn.addEventListener('click', () => {
-        quantity.value = parseInt(quantity.value) + 1;
-    });
-    
     const initProductShowPage = () => {
-        // Add to cart
-        addToCartBtn.addEventListener('click', () => {
-            const product = {
-                id: {{ $product->id }},
-                name: '{{ $product->name }}',
-                price: {{ $product->price }},
-                quantity: parseInt(quantity.value),
-                image: document.getElementById('mainImage').src
-            };
-            
-            CartHelper.addToCart(product);
-            CartHelper.updateUI();
-            showToast('Đã thêm vào giỏ hàng', 'success');
+        const quantity = document.getElementById('quantity');
+        const decreaseBtn = document.getElementById('decreaseQty');
+        const increaseBtn = document.getElementById('increaseQty');
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        const mainImage = document.getElementById('mainImage');
+        const productName = @json($product->name);
+
+        if (!quantity || !decreaseBtn || !increaseBtn || !addToCartBtn || !mainImage) {
+            return;
+        }
+
+        const normalizeQuantity = () => {
+            let value = parseInt(quantity.value, 10);
+            if (Number.isNaN(value) || value < 1) {
+                value = 1;
+            }
+            quantity.value = value;
+            return value;
+        };
+
+        quantity.addEventListener('input', normalizeQuantity);
+
+        decreaseBtn.addEventListener('click', function () {
+            quantity.stepDown();
+            normalizeQuantity();
         });
-        
-        // Add to cart from similar products
-        document.querySelectorAll('.add-to-cart').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const product = {
-                    id: this.dataset.productId,
-                    name: this.dataset.productName,
-                    price: parseFloat(this.dataset.productPrice),
-                    quantity: 1,
-                    image: this.closest('.card').querySelector('.product-image').src
-                };
-                
-                CartHelper.addToCart(product);
-                CartHelper.updateUI();
-                showToast('Đã thêm vào giỏ hàng', 'success');
-            });
+
+        increaseBtn.addEventListener('click', function () {
+            quantity.stepUp();
+            normalizeQuantity();
         });
+
+        // The form submission is handled by cart.js via AJAX and backend session logic.
+        // Keep quantity input correct, but do not add items to localStorage here.
+        addToCartBtn.addEventListener('click', function () {
+            normalizeQuantity();
+        });
+
     };
 
     if (document.readyState === 'loading') {

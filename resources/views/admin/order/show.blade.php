@@ -25,8 +25,12 @@
             <div class="card p-3">
                 <h5>Thông tin đơn hàng</h5>
                 <p><strong>Mã đơn:</strong> {{ $order->order_code }}</p>
+                <p><strong>Ngày tạo:</strong> {{ $order->created_at->format('d/m/Y H:i') }}</p>
                 <p><strong>Trạng thái:</strong> {{ ucfirst($order->status) }}</p>
                 <p><strong>Phương thức:</strong> {{ strtoupper($order->payment_method) }}</p>
+                <p><strong>Subtotal:</strong> {{ number_format($order->subtotal, 0, ',', '.') }}₫</p>
+                <p><strong>Shipping:</strong> {{ number_format($order->shipping, 0, ',', '.') }}₫</p>
+                <p><strong>Tax:</strong> {{ number_format($order->tax, 0, ',', '.') }}₫</p>
                 <p><strong>Tổng:</strong> {{ number_format($order->total, 0, ',', '.') }}₫</p>
                 <p><strong>Ghi chú:</strong> {{ $order->notes ?? 'Không có' }}</p>
             </div>

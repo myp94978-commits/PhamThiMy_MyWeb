@@ -47,13 +47,12 @@
                     </a>
                 </div>
                 <div class="col-6">
-                    <button type="button" class="btn btn-success w-100 add-to-cart"
-                            data-product-id="{{ $product->id }}"
-                            data-product-name="{{ $product->productname }}"
-                            data-product-price="{{ $product->pricediscount > 0 ? $product->pricediscount : $product->price }}"
-                            data-product-image="{{ $imageUrl }}">
-                        <i class="bi bi-cart-plus"></i>
-                    </button>
+                    <form action="{{ route('cart.add', $product->id) }}" method="POST" class="form-add-cart">
+                        @csrf
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-cart-plus"></i>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

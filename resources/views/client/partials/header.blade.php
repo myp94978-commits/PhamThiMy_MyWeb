@@ -12,8 +12,16 @@
                 </span>
             </div>
             <div class="topbar-right small text-white-75">
-                <a href="#" class="text-white text-decoration-none me-3">Đăng nhập</a>
-                <a href="#" class="text-white text-decoration-none me-3">Đăng ký</a>
+                @guest
+                    <a href="{{ route('login') }}" class="text-white text-decoration-none me-3">Đăng nhập</a>
+                    <a href="{{ route('register') }}" class="text-white text-decoration-none me-3">Đăng ký</a>
+                @else
+                    <span class="me-3">Xin chào {{ auth()->user()->fullname }}</span>
+                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-link text-white p-0 m-0 align-baseline text-decoration-none">Đăng xuất</button>
+                    </form>
+                @endguest
                 <a href="{{ route('contact') }}" class="text-white text-decoration-none">Liên hệ</a>
             </div>
         </div>
